@@ -11,9 +11,9 @@ $ go install github.com/picatz/manuf@latest
 
 ## Usage
 
-The `manuf` CLI tool can be used with tools like `grep` and `jq` to filter results. Records are fetched over HTTP on first use,
-cached in a local directroy, `/Users/$USER/Library/Caches/manuf.csv` on macOS. HTTP is required because `standards-oui.ieee.org`
-does NOT support TLS. After 30 days, the records are fetched again to refresh the cache, again over HTTP.
+The `manuf` CLI tool can be used with tools like `grep` and `jq` to filter results. Records are fetched over HTTPS on first use
+from [`manuf.csv`]("https://raw.githubusercontent.com/picatz/manuf/main/manuf.csv"), which is then cached in a local directroy,
+`/Users/$USER/Library/Caches/manuf.csv` on macOS. After 30 days, the records are fetched again to refresh the cache.
 
 ```go
 $ manuf | grep "Apple, Inc."

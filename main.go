@@ -51,7 +51,7 @@ func main() {
 	if err != nil {
 		if os.IsNotExist(err) {
 			writeDiagnostic(fmt.Sprintf("no cache %q found, creating", path))
-			records, err := index.HTTPGetAllRecords(ctx, client)
+			records, err := index.HTTPGetRecords(ctx, client, string(index.RawGitHubURL))
 			handleError("failed to fetch all records to populate cache", err)
 
 			err = records.Write(path)
