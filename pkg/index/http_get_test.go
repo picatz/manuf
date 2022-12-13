@@ -67,3 +67,11 @@ func TestHTTPGet(t *testing.T) {
 	}
 	t.Logf("got %d records from file", len(cachedRecords))
 }
+
+func TestHTTPGetAllRecords(t *testing.T) {
+	allRecords, err := HTTPGetAllRecords(context.Background(), http.DefaultClient)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	t.Logf("got %d records from HTTP requests", len(allRecords))
+}

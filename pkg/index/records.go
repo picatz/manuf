@@ -43,6 +43,7 @@ type Record struct {
 	OrganizationAddress string
 }
 
+// CSV returns a slice of strings representing the record in CSV format.
 func (r *Record) CSV() []string {
 	return []string{
 		string(r.Registry),
@@ -58,14 +59,19 @@ func (r *Record) CSV() []string {
 // 	return strings.Join(parts[0:2], "") + ":" + strings.Join(parts[2:4], "") + ":" + strings.Join(parts[4:], "")
 // }
 
+// Records is a slice of individual record entries.
 type Records []*Record
 
+// Write writes the records to a CSV file.
 func (r Records) Write(filepath string) error {
+	// Open file for writing.
 	fh, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0640)
 	if err != nil {
 		return fmt.Errorf("failed to open file for writing %q: %w", filepath, err)
 	}
 	defer fh.Close()
+
+	// Write records to file.
 	w := csv.NewWriter(fh)
 	err = w.Write(strings.Split("Registry,Assignment,Organization Name,Organization Address", ","))
 	if err != nil {
@@ -85,11 +91,13 @@ func (r Records) Write(filepath string) error {
 	return nil
 }
 
+// RecordsFromReader reads records from a CSV file reader.
 func RecordsFromReader(rdr io.Reader) (Records, error) {
 	records := Records{}
 
 	r := csv.NewReader(rdr)
 
+	// Read records, skipping header.
 	for {
 		parts, err := r.Read()
 		if err != nil {
@@ -113,6 +121,7 @@ func RecordsFromReader(rdr io.Reader) (Records, error) {
 	return records, nil
 }
 
+// RecordsFromFile reads records from a CSV file path.
 func RecordsFromFile(filepath string) (Records, error) {
 	fh, err := os.OpenFile(filepath, os.O_RDONLY, 0755)
 	if err != nil {

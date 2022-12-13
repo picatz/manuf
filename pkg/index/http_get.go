@@ -9,45 +9,41 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// HTTPGetAllRecords fetches all records all public listing URLs concurrently.
 func HTTPGetAllRecords(ctx context.Context, client *http.Client) (Records, error) {
-	urls := []PublicListingURL{
-		OUIURL,
-		CIDURL,
-		IABURL,
-		MAMURL,
-		OUI36URL,
-	}
-
-	allRecords := map[PublicListingURL]Records{}
-	allRecordsMutex := sync.Mutex{}
+	var allRecords sync.Map
 
 	eg, gtx := errgroup.WithContext(ctx)
 
-	for i := range urls {
-		url := urls[i]
+	// Fetch all records concurrently.
+	for i := range AllPublicListingURLs {
+		url := AllPublicListingURLs[i]
 		eg.Go(func() error {
 			records, err := HTTPGetRecords(gtx, client, string(url))
 			if err != nil {
 				return fmt.Errorf("failed to get records for %q: %w", url, err)
 			}
-			allRecordsMutex.Lock()
-			allRecords[url] = records
-			allRecordsMutex.Unlock()
+
+			allRecords.Store(url, records)
 			return nil
 		})
 	}
 
+	// Wait for all records to be fetched.
 	err := eg.Wait()
 	if err != nil {
 		return nil, err
 	}
 
+	// Merge all records into a single slice.
 	records := Records{}
 
-	for url := range allRecords {
-		records = append(records, allRecords[url]...)
-	}
+	allRecords.Range(func(key, value interface{}) bool {
+		records = append(records, value.(Records)...)
+		return true
+	})
 
+	// Return all records.
 	return records, nil
 }
 
